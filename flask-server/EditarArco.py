@@ -6,31 +6,43 @@ import json
 def crearArc(ini,fin,w):
     G=subirGrafo() 
     
-    if(ini==None or fin==None or  yaExisteArco(G,ini,fin)):
-        print("Nombre invalido")
+    if(ini=='' or fin=='' ):
+        return("Por favor ingrese los nodos")
+    elif( yaExisteArco(G,ini,fin)):
+        return "Ya existe un arco entre los nodos"
     else:
         G.add_edge(int(ini),int(fin),weight=int(w))
         guardarGrafoJson(G)
+        return "Arco creado"
 
 
 def borrarArc(ini,fin):
     G=subirGrafo() 
-    
-    if(ini==None or fin==None or not G.has_edge(int(ini),int(fin))):
-        print("Nombre invalido")
+    salida=""
+    if(ini=='' or fin=='' or not G.has_edge(int(ini),int(fin))):
+        salida = "No se encontro un arco entre esos nodos"
     else:
-        G.remove_edge((int(ini),int(fin)))
+        G.remove_edge(int(ini),int(fin))
         guardarGrafoJson(G)
-    if(ini==None or fin==None or not G.has_edge(int(fin),int(ini))):
-        print("Nombre invalido")
+        return "Arco removido con exito"
+    if(ini=='' or fin=='' or not G.has_edge(int(fin),int(ini))):
+        salida = "No se encontro un arco entre esos nodos"
     else:
-        G.remove_edge((int(fin),int(ini)))
+        G.remove_edge(int(fin),int(ini))
         guardarGrafoJson(G)
+        return "Arco removido con exito"
+
+    return salida
 
 def editArc(ini,fin,nIni,nFin,w):
     G=subirGrafo()
-    if(ini==None or fin==None or nIni==None or nFin==None or  yaExisteArco(G,nFin,nIni) or  yaExisteArco(G,nIni,nFin)):
-        print("Nombre invalido")
+    if(ini=='' or fin=='' or nIni=='' or nFin==''):
+        return("Nombre invalido")
+    elif(yaExisteArco(G,nFin,nIni) or  yaExisteArco(G,nIni,nFin)):
+        return "Ya existe un arco entre los nuevos nodos"
+    elif (not G.has_node(int(nIni)) or not G.has_node(int(nFin))):
+
+        return "No existe el nodo"
     else:
         data=json_graph.node_link_data(G)
         for i in data['links']:
@@ -45,7 +57,7 @@ def editArc(ini,fin,nIni,nFin,w):
                     i['weight']=int(w)
         G = json_graph.node_link_graph(data)        
         guardarGrafoJson(G)
-
+        return "Arco editado con exito"
 
 def subirGrafo():
     with open('../nuevo/src/data/data.json') as f:

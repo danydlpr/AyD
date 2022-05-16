@@ -5,12 +5,13 @@ import json
 
 
 def personalizado(G,label):
-    G=nx.DiGraph()
-    if(label==None):
-        print("Nombre invalido")
+    G=nx.Graph()
+    if(label==''):
+        return "Nombre invalido"
     else:
         G.add_node(label)
         guardarGrafoJson(G)
+        return "Grafo creado con éxito"
             
         
   

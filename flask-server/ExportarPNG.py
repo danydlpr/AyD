@@ -9,7 +9,7 @@ def guardarPNG(name):
  with open('../nuevo/src/data/data.json') as f:
         js_graph = json.load(f)
         G = json_graph.node_link_graph(js_graph)
-        print(G)
+        
 
         dot = to_pydot(G).to_string()
 

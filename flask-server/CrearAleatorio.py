@@ -13,7 +13,7 @@ def limite(node):
 
 def aleatorio(G, nodes, arc):
     if(arc > limite(nodes)):
-        print("Cantidad de aristas posibles excedidas")
+       return "Cantidad de aristas posibles excedidas"
     else:
         for i in range(nodes):
             G.add_node(i+1)
@@ -32,6 +32,7 @@ def aleatorio(G, nodes, arc):
                     G.add_edge(nI, nD, weight=peso)
                     creado = False
         guardarGrafoJson(G)
+        return "Grafo creado con exito"
 
 
 def guardarGrafoJson(G):

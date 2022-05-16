@@ -1,10 +1,8 @@
 
-from cProfile import label
 import random
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from flask_cors import CORS
 from pymongo import MongoClient
-from networkx.readwrite import json_graph
 import json
 import pandas as pd
 import networkx as nx
@@ -14,12 +12,11 @@ import Cerrar
 import EditarNodo
 import ExportarPDF
 import ExportarPNG
-from networkx.drawing.nx_pydot import to_pydot
 import EditarArco
-
+from networkx.readwrite import json_graph
 app = Flask(__name__)
 CORS(app)
-G = nx.DiGraph()
+G = nx.Graph()
 numg = 0
 
 
@@ -47,11 +44,17 @@ class Graph:
     def guardarGrafo(self, numg):
         with open('../nuevo/src/data/data.json') as file:
             data = json.load(file)
+            num=str(round(random.random()*100))
             a = '../nuevo/src/saves/save' + \
-                str(round(random.random()*100))+".json"
+                num+".json"
             with open(a, 'w') as f:
                 json.dump(data, f, indent=4)
-                numg += 1
+                return"Guardado exitosamente como: save"+str(num)+".json"
+    def matrix(self):
+        with open('../nuevo/src/data/data.json') as f:
+            js_graph = json.load(f)
+            G= json_graph.node_link_graph(js_graph) 
+            return nx.adjacency_matrix(G,nodelist=sorted(G.nodes()), weight='weight').todense()
 
     def guardarComo(self, name):
         with open('../nuevo/src/data/data.json') as file:
@@ -59,6 +62,8 @@ class Graph:
             a = '../nuevo/src/saves/'+name+".json"
             with open(a, 'w') as f:
                 json.dump(data, f, indent=4)
+                return"Guardado exitosamente como: "+str(name)+".json"
+                
 
     def guardarExcel(self, name):
         with open('../nuevo/src/data/data.json') as file:
@@ -67,13 +72,14 @@ class Graph:
             df = pd.DataFrame.from_dict(data, orient='index')
             df.transpose()
             df.to_excel(a)
-    def abrir(self,name):
-         with open('../nuevo/src/saves/'+name+'.json') as file:
+            return "Guardado como"+name+".xlsx con exito"
+
+    def abrir(self, name):
+        with open('../nuevo/src/saves/'+name+'.json') as file:
             data = json.load(file)
             with open('../nuevo/src/data/data.json', 'w') as f:
                 json.dump(data, f, indent=4)
-
-    
+                return "Grafo abierto"
 
 
 @app.route("/grafo")
@@ -84,120 +90,125 @@ def grafo():
 
 @app.route("/guardar", methods=['POST'])
 def guardar():
-    Graph.guardarGrafo(Graph, numg)
+    msm=Graph.guardarGrafo(Graph, numg)
     Graph.crearDB(Graph)
-    return "hoña"
+    return msm
 
 
 @app.route("/guardarComo", methods=['POST'])
 def guardarComo():
     name = request.json['name']
-    Graph.guardarComo(Graph, name)
+    msm=Graph.guardarComo(Graph, name)
     Graph.crearDB(Graph)
-    return "hoña"
+    return msm
+
+@app.route("/matrix", methods=['POST'])
+def matrix():
+    
+    return str(Graph.matrix(Graph))
 
 
 @app.route("/exportarComoExcel", methods=['POST'])
 def guardarComoExcel():
     name = request.json['name']
-    Graph.guardarExcel(Graph, name)
-    return "hoña"
+    
+    return Graph.guardarExcel(Graph, name)
+
+
 @app.route("/exportarComoPDF", methods=['POST'])
 def guardarComoPDF():
-    
+
     name = request.json['name']
-    
+
     ExportarPDF.guardarPDF(name)
     return "hoña"
+
+
 @app.route("/exportarComoPNG", methods=['POST'])
 def guardarComoPNG():
-    
+
     name = request.json['name']
-    
+
     ExportarPNG.guardarPNG(name)
     return "hoña"
 
 
 @app.route("/crearAl", methods=['POST'])
 def crear():
-    G = nx.DiGraph()
+    G = nx.Graph()
     nodes = request.json['nodes']
 
     arcos = request.json['arcos']
-   
-    CrearAleatorio.aleatorio(G, int(nodes), int(arcos))
-    return "hoña"
+
+    return CrearAleatorio.aleatorio(G, int(nodes), int(arcos))
+
+
 @app.route("/editarNodo", methods=['POST'])
 def editarNodo():
-    
+
     label = request.json['label']
 
     nuevo = request.json['nuevo']
-    EditarNodo.editarNodo(label,nuevo)
     
-    return "hoña"
+
+    return EditarNodo.editarNodo(label, nuevo)
+
 
 @app.route("/nuevoNodo", methods=['POST'])
 def nuevoNodo():
     label = request.json['name']
-    EditarNodo.crearNodo(label)
-    return "fd"
     
+    return EditarNodo.crearNodo(label)
+
+
 @app.route("/eliminarNodo", methods=['POST'])
 def eliminarNodo():
     label = request.json['name']
-    EditarNodo.eliminarNodo(label)
+    return EditarNodo.eliminarNodo(label)
 
-    return "hoña"
+
 @app.route("/editarArco", methods=['POST'])
 def editarArco():
-    
+
     inicio = request.json['inicio']
-    w=request.json['weight']
+    w = request.json['weight']
     fin = request.json['fin']
     nuevoInicio = request.json['nuevoInicio']
     nuevoFin = request.json['nuevoFin']
-    EditarArco.editArc(inicio,fin,nuevoInicio,nuevoFin,w)
-    
-    return "hoña"
+    return EditarArco.editArc(inicio, fin, nuevoInicio, nuevoFin, w)
+
 
 @app.route("/nuevoArco", methods=['POST'])
 def nuevoArco():
     inicio = request.json['inicio']
-    w=request.json['weight']
+    w = request.json['weight']
     fin = request.json['fin']
-    EditarArco.crearArc(inicio,fin,w)
-    return "fd"
-    
+    return EditarArco.crearArc(inicio, fin, w)
+
+
 @app.route("/eliminarArco", methods=['POST'])
 def eliminarArco():
     inicio = request.json['inicio']
-
     fin = request.json['fin']
-    EditarArco.borrarArc(inicio,fin)
+    return EditarArco.borrarArc(inicio, fin)
 
-    return "hoña"
+
 @app.route("/crearPer", methods=['POST'])
 def crearPer():
     label = request.json['name']
-    crearPersonalizado.personalizado(G, label)
-
-    return "hoña"
+    return crearPersonalizado.personalizado(G, label)
 
 
 @app.route("/clear")
 def clear():
-    Cerrar.cerrarGrafoJson()
-    return "hoña"
+
+    return Cerrar.cerrarGrafoJson()
 
 
 @app.route("/abrir", methods=['POST'])
 def abrir():
     label = request.json['archivo']
-    print(label)
-    Graph.abrir(Graph,label)
-
-    return "hoña"
+    return Graph.abrir(Graph, label)
 
 
 if __name__ == "__main__":

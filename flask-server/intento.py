@@ -4,13 +4,14 @@ from networkx.drawing.nx_pydot import to_pydot
 import graphviz
 from networkx.readwrite import json_graph
 
-G = nx.DiGraph() 
+G = nx.Graph() 
 G.add_node("a")
 G.add_node("b")
-G.remove_node("a")
+G.add_node("c")
+
 
 G.add_edge("a","b")
 
+print(nx.adjacency_matrix(G,nodelist=sorted(G.nodes()), weight='weight').todense())
 
-print(G.remove_edge("a","b"))
    
