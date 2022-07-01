@@ -14,7 +14,7 @@ def trinv(matrix):
     return tri
 
 def permutation_matrix(n):
-    rr = range(n)
+    rr = list(range(n))
     np.random.shuffle(rr)
     P = np.take(np.eye(n), rr, axis=0)
     return  P
@@ -162,13 +162,10 @@ def QUEYRANNE(SS, F):
     ## type: (matrix, function) -> (list, float, list)
 
     dim, _ = SS.shape
-    V = [0,1,2]
     
-
-      # is the space of points which is updated at each step we find a pendent pair
+    V = list(range(dim))  # is the space of points which is updated at each step we find a pendent pair
     
     C = []  # set of candidates updated at each step
-    
     while len(V) >= 3:
         W = copy.deepcopy(V)
         a, b = PENDENT_PAIR(SS, W, F)  # find a pendent pair in (V,F)
@@ -182,7 +179,7 @@ def QUEYRANNE(SS, F):
         if ismember(a, V) is True and ismember(b, V) is True:
             V.remove(a)
             V.remove(b)
-    
+
     for subset in V:
         if type(subset) == int:
             C.append([subset])
@@ -195,10 +192,14 @@ def QUEYRANNE(SS, F):
     subset_opt = []
     cluster_max = 0
     partition_value = 0
+    print(C)
+
     for subset in C:
         cluster_value = F(SS, subset)
-        subset_value = cluster_value + F(SS, diff(range(dim), subset))
+        subset_value = cluster_value + F(SS, diff(list(range(dim)), subset))
+        #print(subset_value)
         if subset_value > max_value:
+            #print("a")
             subset_opt = subset
             partition_value = subset_value
             cluster_max = cluster_value
@@ -206,7 +207,8 @@ def QUEYRANNE(SS, F):
 
     return subset_opt, partition_value, cluster_max
 
-matriz = np.array([[0,1,1,1],[1,0,1,0],[1,1,0,1],[1,0,1,0]])
+
+matriz = np.array([[0,5,1,1,0],[0,0,1,1,1],[1,0,0,1,1],[1,2,0,1,1],[1,1,1,0,1]])
 a,b,c = QUEYRANNE(matriz, log_det)
 print(a)
 print(b)

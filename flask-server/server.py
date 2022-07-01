@@ -4,6 +4,7 @@ from flask import Flask, request
 from flask_cors import CORS
 from pymongo import MongoClient
 import json
+from algoritmos import que2
 import pandas as pd
 import networkx as nx
 import CrearAleatorio
@@ -101,6 +102,16 @@ def guardarComo():
     msm=Graph.guardarComo(Graph, name)
     Graph.crearDB(Graph)
     return msm
+
+@app.route("/que", methods=['POST'])
+def que():
+    a,b,c =que2.QUEYRANNE(Graph.matrix(Graph),que2.log_det)
+    for i in a :
+        EditarNodo.eliminarNodo(str(i))
+    
+    return str("Se cortaron los nodos: "+str(a))
+
+
 
 @app.route("/matrix", methods=['POST'])
 def matrix():
